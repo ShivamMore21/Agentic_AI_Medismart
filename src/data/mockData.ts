@@ -7,7 +7,10 @@ import {
   UserSession,
   PharmacyApplication,
   PriceDiscrepancyReport,
-  CdscoPriceCeilingItem
+  CdscoPriceCeilingItem,
+  MedicalCondition,
+  MedicineHistoryItem,
+  ConditionRecommendation
 } from '../types';
 
 export const POPULAR_MEDICINES: Medicine[] = [
@@ -638,7 +641,488 @@ export const MOCK_USERS: Record<string, UserSession> = {
     avatarText: 'RS',
     organization: 'Indiranagar Patient Network',
     phone: '+91 98450 67890',
-    abdmVerified: true
+    abdmVerified: true,
+    age: 36,
+    gender: 'Female',
+    pincode: '560038',
+    locality: 'Indiranagar, Bengaluru',
+    abhaId: '91-8842-1092-5501@abdm',
+    existingConditions: ['Type 2 Diabetes Mellitus', 'Hypertension']
+  }
+};
+
+export const COMMON_MEDICAL_CONDITIONS_LIST = [
+  'Type 2 Diabetes Mellitus',
+  'Hypertension (High Blood Pressure)',
+  'Asthma / Respiratory Conditions',
+  'Dyslipidemia / High Cholesterol',
+  'Hypothyroidism',
+  'Chronic Kidney Disease (CKD)',
+  'Osteoarthritis / Joint Pain',
+  'Acid Peptic Disease / GERD'
+];
+
+export const MOCK_PATIENT_CONDITIONS: MedicalCondition[] = [
+  {
+    id: 'cond-01',
+    conditionName: 'Type 2 Diabetes Mellitus',
+    diagnosedYear: '2022',
+    severity: 'Controlled',
+    notes: 'HbA1c target < 6.8%. Strictly avoiding high-fructose syrups and unmonitored corticosteroids.',
+    contraindications: ['Systemic Corticosteroids (Prednisolone, Dexamethasone)', 'High-dose Thiazide Diuretics']
+  },
+  {
+    id: 'cond-02',
+    conditionName: 'Hypertension (High Blood Pressure)',
+    diagnosedYear: '2023',
+    severity: 'Controlled',
+    notes: 'Average resting BP 124/82 mmHg. Low sodium diet prescribed.',
+    contraindications: ['Frequent NSAIDs (Ibuprofen, Naproxen, Diclofenac)', 'Decongestants with Pseudoephedrine']
+  }
+];
+
+export const MOCK_MEDICINE_HISTORY: MedicineHistoryItem[] = [
+  {
+    id: 'hist-01',
+    medicineName: 'Jan Aushadhi Metformin PR 500mg',
+    brandPrescribed: 'Glycomet-SR 500mg',
+    saltComposition: 'Metformin Hydrochloride (Prolonged Release)',
+    dosage: '500mg',
+    frequency: '1 Tablet twice daily after meals',
+    conditionTargeted: 'Type 2 Diabetes Mellitus',
+    startDate: '2026-08-15',
+    status: 'Refill Due',
+    pharmacyName: 'PMBJP Jan Aushadhi Kendra - Indiranagar',
+    pharmacyLocality: 'Indiranagar 100ft Road',
+    mrpPaid: 28.00,
+    originalBrandMRP: 98.50,
+    savingsRealized: 70.50,
+    isJanAushadhi: true,
+    holdCode: '#MS-9402',
+    refillDaysLeft: 3,
+    prescribingDoctor: 'Dr. Mohan Kumar MD (Diabetologist, Manipal Hospital)',
+    totalDaysCourse: 30,
+    remainingPills: 4,
+    notes: 'Take with breakfast and dinner. Keep hydration optimal.'
+  },
+  {
+    id: 'hist-02',
+    medicineName: 'Jan Aushadhi Telmisartan 40mg',
+    brandPrescribed: 'Telma 40mg (Glenmark)',
+    saltComposition: 'Telmisartan IP',
+    dosage: '40mg',
+    frequency: '1 Tablet once daily in morning',
+    conditionTargeted: 'Hypertension (High Blood Pressure)',
+    startDate: '2026-08-20',
+    status: 'Refill Due',
+    pharmacyName: 'PMBJP Jan Aushadhi Kendra - Indiranagar',
+    pharmacyLocality: 'Indiranagar 100ft Road',
+    mrpPaid: 22.50,
+    originalBrandMRP: 148.00,
+    savingsRealized: 125.50,
+    isJanAushadhi: true,
+    holdCode: '#MS-8812',
+    refillDaysLeft: 5,
+    prescribingDoctor: 'Dr. Meenakshi Sundaram MD (Cardiology)',
+    totalDaysCourse: 30,
+    remainingPills: 6,
+    notes: 'Do not discontinue without consulting doctor. Monitored BP steady.'
+  },
+  {
+    id: 'hist-03',
+    medicineName: 'Jan Aushadhi Atorvastatin 20mg',
+    brandPrescribed: 'Atorva 20mg (Zydus Cadila)',
+    saltComposition: 'Atorvastatin Calcium IP',
+    dosage: '20mg',
+    frequency: '1 Tablet at night before bed',
+    conditionTargeted: 'Dyslipidemia / High Cholesterol',
+    startDate: '2026-08-01',
+    status: 'Active (Ongoing)',
+    pharmacyName: 'Bengaluru Health Hub (Koramangala Branch)',
+    pharmacyLocality: 'Koramangala 4th Block',
+    mrpPaid: 38.00,
+    originalBrandMRP: 285.00,
+    savingsRealized: 247.00,
+    isJanAushadhi: true,
+    holdCode: '#MS-7719',
+    refillDaysLeft: 18,
+    prescribingDoctor: 'Dr. Meenakshi Sundaram MD',
+    totalDaysCourse: 30,
+    remainingPills: 19,
+    notes: 'Lipid profile scheduled for October review.'
+  },
+  {
+    id: 'hist-04',
+    medicineName: 'PMBJP Pantoprazole Gastro-Resistant 40mg',
+    brandPrescribed: 'Pan 40mg (Alkem)',
+    saltComposition: 'Pantoprazole Sodium IP',
+    dosage: '40mg',
+    frequency: '1 Tablet 30 minutes before breakfast',
+    conditionTargeted: 'Acid Peptic Disease / GERD',
+    startDate: '2026-07-10',
+    endDate: '2026-07-24',
+    status: 'Completed',
+    pharmacyName: 'MedPlus Pharmacy & Wellness',
+    pharmacyLocality: 'HAL 2nd Stage',
+    mrpPaid: 21.00,
+    originalBrandMRP: 115.00,
+    savingsRealized: 94.00,
+    isJanAushadhi: true,
+    prescribingDoctor: 'Dr. R. K. Varma MBBS (General Physician)',
+    totalDaysCourse: 14,
+    remainingPills: 0,
+    notes: 'Completed 14-day acute gastritis taper course. Symptoms resolved.'
+  },
+  {
+    id: 'hist-05',
+    medicineName: 'Jan Aushadhi Amoxicillin + Potassium Clavulanate 625mg',
+    brandPrescribed: 'Augmentin 625 Duo (GSK)',
+    saltComposition: 'Amoxicillin 500mg + Clavulanic Acid 125mg',
+    dosage: '625mg',
+    frequency: '1 Tablet every 12 hours for 5 days',
+    conditionTargeted: 'Bacterial Bronchitis / Upper RTI',
+    startDate: '2026-06-12',
+    endDate: '2026-06-17',
+    status: 'Completed',
+    pharmacyName: 'PMBJP Jan Aushadhi Kendra - HAL 2nd Stage',
+    pharmacyLocality: 'HAL 2nd Stage, Indiranagar',
+    mrpPaid: 78.00,
+    originalBrandMRP: 201.27,
+    savingsRealized: 123.27,
+    isJanAushadhi: true,
+    prescribingDoctor: 'Dr. Sunita Rao MD (Pulmonology)',
+    totalDaysCourse: 5,
+    remainingPills: 0,
+    notes: 'Full antibiotic course completed without premature stoppage.'
+  },
+  {
+    id: 'hist-06',
+    medicineName: 'Jan Aushadhi Montelukast 10mg + Levocetirizine 5mg',
+    brandPrescribed: 'Montair-LC (Cipla)',
+    saltComposition: 'Montelukast Sodium 10mg + Levocetirizine 5mg',
+    dosage: '10mg/5mg',
+    frequency: '1 Tablet bedtime as needed for seasonal allergy',
+    conditionTargeted: 'Allergic Rhinitis / Seasonal Asthma',
+    startDate: '2026-08-10',
+    status: 'Active (Ongoing)',
+    pharmacyName: 'PMBJP Jan Aushadhi Kendra - Indiranagar',
+    pharmacyLocality: 'Indiranagar 100ft Road',
+    mrpPaid: 32.00,
+    originalBrandMRP: 182.50,
+    savingsRealized: 150.50,
+    isJanAushadhi: true,
+    refillDaysLeft: 12,
+    prescribingDoctor: 'Dr. Sunita Rao MD',
+    totalDaysCourse: 20,
+    remainingPills: 12,
+    notes: 'Take during rainy seasonal weather or allergen spikes.'
+  }
+];
+
+export const CONDITION_RECOMMENDATIONS_DATA: Record<string, ConditionRecommendation> = {
+  'Type 2 Diabetes Mellitus': {
+    conditionName: 'Type 2 Diabetes Mellitus',
+    category: 'Endocrine & Metabolic Care',
+    lifestyleTips: [
+      'Maintain 30 minutes of brisk walking or moderate aerobic exercise 5 days/week.',
+      'Prioritize complex carbohydrates with low glycemic index (millets, oats, whole grains).',
+      'Hydrate with at least 2.5-3L water daily to assist renal excretion of glucose.'
+    ],
+    monitoringGuideline: 'Check Fasting & Post-prandial blood glucose fortnightly; monitor HbA1c every 3 months (target: < 6.8%).',
+    commonContraindications: [
+      {
+        drugClass: 'Systemic Corticosteroids (Prednisolone, Betamethasone)',
+        reason: 'Causes hepatic gluconeogenesis and severe insulin resistance, triggering dangerous blood glucose spikes.'
+      },
+      {
+        drugClass: 'High-dose Thiazide Diuretics',
+        reason: 'Can impair pancreatic beta-cell insulin secretion and worsen glycemic control.'
+      }
+    ],
+    recommendedSalts: [
+      {
+        saltName: 'Metformin Hydrochloride (Prolonged Release 500mg / 1000mg)',
+        indication: 'First-line monotherapy for glycemic control and insulin sensitization',
+        standardDosage: '500mg - 1000mg once or twice daily after main meals',
+        brandedExamples: ['Glycomet-SR', 'Obimet-SR', 'Cetapin-XR'],
+        brandedAvgMRP: 98.00,
+        janAushadhiGenericPrice: 28.00,
+        savingsPct: 71,
+        firstLineClinicalRationale: 'ICMR Guidelines 2024 specify Metformin PR as first-line for HbA1c reduction without hypoglycemia risk.',
+        inStockStoresCount: 14
+      },
+      {
+        saltName: 'Glimepiride 1mg / 2mg Tablet',
+        indication: 'Sulfonylurea secretagogue for post-prandial glucose surges',
+        standardDosage: '1mg or 2mg taken immediately before breakfast',
+        brandedExamples: ['Amaryl 1mg/2mg', 'Glimestar', 'Zoryl'],
+        brandedAvgMRP: 112.00,
+        janAushadhiGenericPrice: 19.50,
+        savingsPct: 83,
+        firstLineClinicalRationale: 'Second-line addition when Metformin monotherapy achieves inadequate HbA1c reduction.',
+        inStockStoresCount: 12
+      },
+      {
+        saltName: 'Dapagliflozin 10mg Tablet',
+        indication: 'SGLT2 inhibitor providing glycemic control with cardio-renal protection',
+        standardDosage: '10mg once daily in morning with or without food',
+        brandedExamples: ['Forxiga 10mg', 'Daxin', 'Oxra'],
+        brandedAvgMRP: 540.00,
+        janAushadhiGenericPrice: 85.00,
+        savingsPct: 84,
+        firstLineClinicalRationale: 'Proven reduction in cardiovascular hospitalization and slows progression of diabetic kidney disease.',
+        inStockStoresCount: 9
+      },
+      {
+        saltName: 'Teneligliptin 20mg Tablet',
+        indication: 'DPP-4 inhibitor enhancing endogenous incretin levels without weight gain',
+        standardDosage: '20mg once daily',
+        brandedExamples: ['Ziten 20mg', 'Dynaglipt', 'Tenali'],
+        brandedAvgMRP: 165.00,
+        janAushadhiGenericPrice: 34.00,
+        savingsPct: 79,
+        firstLineClinicalRationale: 'Safely administered without dose titration even in mild-to-moderate renal impairment.',
+        inStockStoresCount: 11
+      }
+    ]
+  },
+  'Hypertension (High Blood Pressure)': {
+    conditionName: 'Hypertension (High Blood Pressure)',
+    category: 'Cardiovascular Care',
+    lifestyleTips: [
+      'Adopt DASH diet guidelines: restrict daily sodium intake to under 2.0g (approx 1 level teaspoon salt).',
+      'Avoid high-sodium preserved foods (pickles, papads, canned broths, salted snacks).',
+      'Incorporate stress management, regular sleep hygiene, and daily aerobic movement.'
+    ],
+    monitoringGuideline: 'Log resting blood pressure 2-3 times per week; target seated BP < 130/80 mmHg.',
+    commonContraindications: [
+      {
+        drugClass: 'Frequent NSAIDs (Ibuprofen, Naproxen, Diclofenac)',
+        reason: 'Inhibits renal prostaglandin synthesis, leading to sodium and water retention and blunting anti-hypertensive drugs.'
+      },
+      {
+        drugClass: 'Oral Decongestants containing Pseudoephedrine or Phenylephrine',
+        reason: 'Causes systemic vasoconstriction, causing sudden acute blood pressure elevations.'
+      }
+    ],
+    recommendedSalts: [
+      {
+        saltName: 'Telmisartan 40mg Tablet IP',
+        indication: 'Angiotensin II Receptor Blocker (ARB) with 24-hour sustained vascular protection',
+        standardDosage: '40mg once daily in morning',
+        brandedExamples: ['Telma 40', 'Micardis', 'Telmikind'],
+        brandedAvgMRP: 148.00,
+        janAushadhiGenericPrice: 22.50,
+        savingsPct: 85,
+        firstLineClinicalRationale: 'Cardio-protective ARB with longest elimination half-life (24 hrs) preventing early morning BP spikes.',
+        inStockStoresCount: 16
+      },
+      {
+        saltName: 'Amlodipine 5mg Tablet IP',
+        indication: 'Dihydropyridine Calcium Channel Blocker for arterial vasodilation',
+        standardDosage: '5mg once daily',
+        brandedExamples: ['Norvasc 5mg', 'Amlopres 5', 'Stamlo 5'],
+        brandedAvgMRP: 85.00,
+        janAushadhiGenericPrice: 12.00,
+        savingsPct: 86,
+        firstLineClinicalRationale: 'Excellent peripheral vascular resistance reduction; synergistic when combined with Telmisartan.',
+        inStockStoresCount: 15
+      },
+      {
+        saltName: 'Metoprolol Succinate Prolonged-Release 25mg / 50mg',
+        indication: 'Cardioselective Beta-1 adrenergic blocker for patients with angina or tachycardia',
+        standardDosage: '25mg - 50mg once daily',
+        brandedExamples: ['Betaloc 50', 'Metolar-XR 50', 'Seloken'],
+        brandedAvgMRP: 175.00,
+        janAushadhiGenericPrice: 26.00,
+        savingsPct: 85,
+        firstLineClinicalRationale: 'Controls elevated resting heart rate and reduces myocardial oxygen demand.',
+        inStockStoresCount: 10
+      }
+    ]
+  },
+  'Asthma / Respiratory Conditions': {
+    conditionName: 'Asthma / Respiratory Conditions',
+    category: 'Pulmonary Care',
+    lifestyleTips: [
+      'Keep indoor environments free of dust mites, incense smoke, and strong chemical sprays.',
+      'Always carry quick-relief rescue inhaler during outdoor commutes or Bengaluru pollen season.',
+      'Rinse mouth thoroughly with water after using corticosteroid inhalers to prevent oral thrush.'
+    ],
+    monitoringGuideline: 'Measure Peak Expiratory Flow Rate (PEFR) during flare-ups; review inhaler technique every 6 months.',
+    commonContraindications: [
+      {
+        drugClass: 'Non-selective Beta Blockers (Propranolol, Timolol eye drops)',
+        reason: 'Blocks beta-2 receptors in bronchial smooth muscle, provoking life-threatening bronchospasm.'
+      },
+      {
+        drugClass: 'Aspirin & NSAIDs (in Aspirin-Exacerbated Respiratory Disease)',
+        reason: 'Shunts arachidonic acid metabolism to leukotrienes, inducing severe acute asthma attacks in susceptible patients.'
+      }
+    ],
+    recommendedSalts: [
+      {
+        saltName: 'Salbutamol (Albuterol) 100mcg Inhaler',
+        indication: 'Short-acting beta-2 agonist (SABA) rescue bronchodilator',
+        standardDosage: '1-2 puffs as needed for acute wheeze or chest tightness',
+        brandedExamples: ['Asthalin Inhaler', 'Ventorlin'],
+        brandedAvgMRP: 165.00,
+        janAushadhiGenericPrice: 42.00,
+        savingsPct: 75,
+        firstLineClinicalRationale: 'Gold standard fast-onset bronchodilator for prompt symptom relief within 5 minutes.',
+        inStockStoresCount: 14
+      },
+      {
+        saltName: 'Budesonide 200mcg + Formoterol 6mcg Inhaler',
+        indication: 'Inhaled corticosteroid + Long-acting beta-2 agonist maintenance controller',
+        standardDosage: '1 puff twice daily regular maintenance',
+        brandedExamples: ['Foracort 200', 'Symbicort', 'Budamate 200'],
+        brandedAvgMRP: 420.00,
+        janAushadhiGenericPrice: 110.00,
+        savingsPct: 74,
+        firstLineClinicalRationale: 'GINA Guidelines 2024 recommendation for primary asthma maintenance preventing remodeling.',
+        inStockStoresCount: 11
+      },
+      {
+        saltName: 'Montelukast 10mg + Levocetirizine 5mg Tablet',
+        indication: 'Leukotriene receptor antagonist + antihistamine for allergic bronchospasm',
+        standardDosage: '1 tablet nightly at bedtime',
+        brandedExamples: ['Montair-LC', 'Telekast-L', 'Levocet-M'],
+        brandedAvgMRP: 182.00,
+        janAushadhiGenericPrice: 32.00,
+        savingsPct: 82,
+        firstLineClinicalRationale: 'Suppresses nocturnal asthma triggers, allergic rhinitis, and eosinophilic airway inflammation.',
+        inStockStoresCount: 13
+      }
+    ]
+  },
+  'Dyslipidemia / High Cholesterol': {
+    conditionName: 'Dyslipidemia / High Cholesterol',
+    category: 'Cardiovascular Care',
+    lifestyleTips: [
+      'Eliminate trans-fats and palm oils; substitute with cold-pressed mustard oil or olive oil.',
+      'Increase soluble fiber (psyllium husk, oats, flaxseed, lentils) to bind intestinal bile acids.',
+      'Engage in regular aerobic conditioning to naturally raise HDL (good cholesterol).'
+    ],
+    monitoringGuideline: 'Fasting Lipid Profile every 6 months (target LDL-C < 70 mg/dL for high risk, Total Cholesterol < 170 mg/dL).',
+    commonContraindications: [
+      {
+        drugClass: 'Macrolide Antibiotics (Clarithromycin, Erythromycin) with Statins',
+        reason: 'Strong CYP3A4 inhibitors that increase statin plasma concentrations, raising rhabdomyolysis / muscle toxicity risk.'
+      },
+      {
+        drugClass: 'High-dose Gemfibrozil with Statins',
+        reason: 'Significantly increases risk of severe myopathy and liver enzyme abnormalities.'
+      }
+    ],
+    recommendedSalts: [
+      {
+        saltName: 'Atorvastatin Calcium 20mg Tablet IP',
+        indication: 'HMG-CoA reductase inhibitor for high-intensity LDL reduction',
+        standardDosage: '20mg once daily at bedtime',
+        brandedExamples: ['Atorva 20', 'Lipitor 20', 'Storvas 20'],
+        brandedAvgMRP: 285.00,
+        janAushadhiGenericPrice: 38.00,
+        savingsPct: 87,
+        firstLineClinicalRationale: 'Reduces LDL-C by 40-50% and stabilizes arterial atherosclerotic plaques.',
+        inStockStoresCount: 15
+      },
+      {
+        saltName: 'Rosuvastatin 10mg Tablet IP',
+        indication: 'Hydrophilic statin with minimal CYP3A4 drug interactions',
+        standardDosage: '10mg once daily in evening',
+        brandedExamples: ['Rozucor 10', 'Crestor 10', 'Rosuvas 10'],
+        brandedAvgMRP: 260.00,
+        janAushadhiGenericPrice: 42.00,
+        savingsPct: 84,
+        firstLineClinicalRationale: 'Higher potency LDL reduction with lower potential for muscle aches in statin-sensitive individuals.',
+        inStockStoresCount: 12
+      },
+      {
+        saltName: 'Fenofibrate Micronized 160mg Tablet',
+        indication: 'PPAR-alpha agonist specifically targeting high triglycerides (> 300 mg/dL)',
+        standardDosage: '160mg once daily with main meal',
+        brandedExamples: ['Lipicard 160', 'Tricor', 'Fibator'],
+        brandedAvgMRP: 215.00,
+        janAushadhiGenericPrice: 45.00,
+        savingsPct: 79,
+        firstLineClinicalRationale: 'Reduces risk of hypertriglyceridemia-induced acute pancreatitis.',
+        inStockStoresCount: 8
+      }
+    ]
+  },
+  'Hypothyroidism': {
+    conditionName: 'Hypothyroidism',
+    category: 'Endocrine Care',
+    lifestyleTips: [
+      'Always take thyroid hormone first thing in the morning with a full glass of water, on an empty stomach.',
+      'Wait at least 45 to 60 minutes before drinking tea, coffee, milk, or consuming breakfast.',
+      'Separate calcium, iron, or antacid supplements by at least 4 hours to avoid absorption binding.'
+    ],
+    monitoringGuideline: 'Serum TSH every 6 to 8 weeks after dose adjustments, and every 6 months once stabilized.',
+    commonContraindications: [
+      {
+        drugClass: 'Simultaneous Calcium Carbonate / Ferrous Sulfate Supplements',
+        reason: 'Forms unabsorbable chelates with Levothyroxine in the gut, rendering hormone replacement ineffective.'
+      },
+      {
+        drugClass: 'Proton Pump Inhibitors taken at the exact same hour',
+        reason: 'Gastric acid is required for optimal dissolution and enteric absorption of Levothyroxine.'
+      }
+    ],
+    recommendedSalts: [
+      {
+        saltName: 'Levothyroxine Sodium 25mcg / 50mcg / 100mcg Tablet',
+        indication: 'Bio-identical synthetic T4 thyroid hormone replacement',
+        standardDosage: 'Exact microgram dose once daily early morning fasting',
+        brandedExamples: ['Thyronorm', 'Eltroxin', 'Thyrox'],
+        brandedAvgMRP: 185.00,
+        janAushadhiGenericPrice: 28.00,
+        savingsPct: 85,
+        firstLineClinicalRationale: 'Standard of care for replenishing circulating thyroxine levels and reversing metabolic slowing.',
+        inStockStoresCount: 14
+      }
+    ]
+  },
+  'Acid Peptic Disease / GERD': {
+    conditionName: 'Acid Peptic Disease / GERD',
+    category: 'Gastroenterology',
+    lifestyleTips: [
+      'Avoid lying flat for at least 2.5 hours after meals to prevent acid reflux regurgitation.',
+      'Limit trigger items: deep fried spicy gravies, excess black coffee, tobacco, and carbonated beverages.',
+      'Elevate the head of your bed by 15 cm if nocturnal reflux or chronic cough occurs.'
+    ],
+    monitoringGuideline: 'Review PPI usage after 4 to 8 weeks; avoid uninterrupted long-term usage without clinical indication.',
+    commonContraindications: [
+      {
+        drugClass: 'Unbuffered NSAIDs (Diclofenac, Ketorolac, Piroxicam)',
+        reason: 'Depletes gastric protective mucosal prostaglandins, provoking severe ulcerations and gastrointestinal bleeding.'
+      }
+    ],
+    recommendedSalts: [
+      {
+        saltName: 'Pantoprazole 40mg Gastro-Resistant Tablet IP',
+        indication: 'Proton Pump Inhibitor for gastric acid suppression and ulcer healing',
+        standardDosage: '40mg once daily 30-45 minutes before first meal',
+        brandedExamples: ['Pan 40', 'Pantocid 40', 'Pantodac 40'],
+        brandedAvgMRP: 115.00,
+        janAushadhiGenericPrice: 21.00,
+        savingsPct: 82,
+        firstLineClinicalRationale: 'Potent and sustained gastric acid suppression with minimal hepatic enzyme interactions.',
+        inStockStoresCount: 16
+      },
+      {
+        saltName: 'Pantoprazole 40mg + Domperidone 30mg SR Capsule',
+        indication: 'Combined acid inhibitor + prokinetic for reflux accompanied by nausea/bloating',
+        standardDosage: '1 capsule once daily before breakfast',
+        brandedExamples: ['Pan-D', 'Pantocid-DSR', 'Dompan-SR'],
+        brandedAvgMRP: 185.00,
+        janAushadhiGenericPrice: 35.00,
+        savingsPct: 81,
+        firstLineClinicalRationale: 'Accelerates gastric emptying while neutralizing acid reflux into lower esophagus.',
+        inStockStoresCount: 13
+      }
+    ]
   }
 };
 

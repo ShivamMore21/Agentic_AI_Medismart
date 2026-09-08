@@ -180,6 +180,40 @@ export const ConsumerDiscoveryView: React.FC<ConsumerDiscoveryViewProps> = ({
 
       </div>
 
+      {/* Chronic Health & Medication History Fast Pass Banner */}
+      <div className="bg-gradient-to-r from-[#e6fbf1] via-white to-[#f0fbf9] rounded-3xl p-5 border border-[#a3faef] shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-[#005c55] text-[#6ffbbe] flex items-center justify-center shrink-0 shadow-xs">
+              <Heart className="w-6 h-6 fill-current" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-gray-900">
+                  Patient Health Profile, History &amp; Refill Due Alert
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#005c55] text-white">
+                  NEW
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 mt-0.5 max-w-2xl leading-relaxed">
+                Log existing conditions like <strong>Type 2 Diabetes &amp; Hypertension</strong>, get personalized ICMR/WHO generic medicine recommendations, and track past prescription history with automatic refill alerts.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => onNavigate('medication-history')}
+              className="px-4 py-2 bg-[#005c55] hover:bg-[#004741] text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
+            >
+              <span>View History &amp; Conditions</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#6ffbbe]" />
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Dual Search Console */}
       <div className="bg-white rounded-3xl p-6 border border-gray-200/80 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

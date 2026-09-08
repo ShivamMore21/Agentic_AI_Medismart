@@ -6,21 +6,18 @@ import {
   Search, 
   Upload, 
   FileCheck, 
-  Sparkles, 
   Layers, 
   Store, 
   Map, 
   CheckCircle2, 
   ShieldCheck, 
   ChevronDown,
-  Activity,
   Heart,
-  UserCheck,
   Building2,
   LogIn,
   LogOut,
-  User,
-  ShieldAlert
+  UserPlus,
+  Clock
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -30,7 +27,7 @@ interface NavbarProps {
   onPincodeChange: (pincode: string, locality: string) => void;
   onOpenUploadModal: () => void;
   currentUser?: UserSession;
-  onOpenLoginModal?: (role?: UserRole) => void;
+  onOpenLoginModal?: (role?: UserRole, initialMode?: 'signin' | 'register') => void;
   onLogout?: () => void;
   onQuickSwitchRole?: (role: UserRole) => void;
 }
@@ -151,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Center Navigation Switchers */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#f1f5f9] p-1 rounded-xl border border-[#e2e8f0]">
+          <nav className="hidden xl:flex items-center gap-1 bg-[#f1f5f9] p-1 rounded-xl border border-[#e2e8f0]">
             <button
               onClick={() => onViewChange('consumer-discovery')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -161,7 +158,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Search className="w-3.5 h-3.5" />
-              <span>Discovery &amp; Savings</span>
+              <span>Discovery</span>
+            </button>
+
+            <button
+              onClick={() => onViewChange('medication-history')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                currentView === 'medication-history'
+                  ? 'bg-[#005c55] text-white shadow-xs'
+                  : 'text-[#005c55] hover:bg-[#005c55]/10 font-bold'
+              }`}
+            >
+              <Heart className="w-3.5 h-3.5 text-red-400 fill-current" />
+              <span>History &amp; Conditions</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span>
             </button>
 
             <button
@@ -173,7 +183,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <FileCheck className="w-3.5 h-3.5" />
-              <span>Rx Salt Parity</span>
+              <span>Rx Parity</span>
             </button>
 
             <button
@@ -185,7 +195,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Map className="w-3.5 h-3.5" />
-              <span>Live Stock Map</span>
+              <span>Live Stock</span>
             </button>
 
             <button
@@ -197,7 +207,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Store className="w-3.5 h-3.5" />
-              <span>B2B Pharmacy</span>
+              <span>B2B Chemist</span>
               {isPharmacist && (
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
               )}
@@ -214,7 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Building2 className="w-3.5 h-3.5" />
-              <span>Admin Console</span>
+              <span>Admin</span>
               {isAdmin && (
                 <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-amber-400 text-slate-950">
                   CDSCO
@@ -231,7 +241,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>PRD &amp; Arch</span>
+              <span>PRD</span>
             </button>
           </nav>
 
@@ -245,10 +255,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline">Upload Rx</span>
             </button>
 
+            {/* Quick Register Button */}
+            {onOpenLoginModal && (
+              <button
+                onClick={() => onOpenLoginModal('patient', 'register')}
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-[#005c55] text-xs font-bold transition-colors"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Register</span>
+              </button>
+            )}
+
             {/* Quick Sign-In Button */}
             {onOpenLoginModal && (
               <button
-                onClick={() => onOpenLoginModal(role === 'patient' ? 'pharmacist' : role)}
+                onClick={() => onOpenLoginModal(role === 'patient' ? 'pharmacist' : role, 'signin')}
                 className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-semibold transition-colors"
               >
                 <LogIn className="w-3.5 h-3.5 text-[#005c55]" />
@@ -315,7 +336,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
                   </div>
 
-                  {/* Role Specific Stats */}
+                  {/* Profile Quick Details */}
                   <div className="py-3 space-y-2 text-xs">
                     {isAdmin ? (
                       <div className="bg-slate-900 text-white p-3 rounded-xl space-y-1">
@@ -353,28 +374,50 @@ export const Navbar: React.FC<NavbarProps> = ({
                           <span className="text-gray-600">Total Year Savings</span>
                           <span className="font-bold text-[#007952] text-sm">₹11,480.00</span>
                         </div>
-                        <div className="flex justify-between items-center p-2 text-gray-600">
-                          <span>Active Prescriptions</span>
-                          <span className="font-semibold text-gray-900">4 Medications</span>
-                        </div>
-                        <div className="flex justify-between items-center p-2 text-gray-600">
-                          <span>Preferred Jan Aushadhi</span>
-                          <span className="font-semibold text-gray-900">HAL 2nd Stage</span>
-                        </div>
+                        
+                        {/* Active Chronic Conditions Pill Display */}
+                        {currentUser?.existingConditions && currentUser.existingConditions.length > 0 && (
+                          <div className="p-2 bg-red-50/70 rounded-xl border border-red-100">
+                            <span className="text-[10px] font-bold text-red-900 block mb-1 flex items-center gap-1">
+                              <Heart className="w-3 h-3 text-red-500 fill-current" /> Active Health Conditions:
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              {currentUser.existingConditions.map((cond, idx) => (
+                                <span key={idx} className="text-[10px] bg-white border border-red-200 text-red-800 px-1.5 py-0.5 rounded font-medium">
+                                  {cond}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            onViewChange('medication-history');
+                            setShowProfileModal(false);
+                          }}
+                          className="w-full text-left p-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-[#005c55] font-bold flex items-center justify-between"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>My Rx History &amp; Refill Due</span>
+                          </span>
+                          <span className="text-[10px] bg-teal-200/60 px-1.5 py-0.5 rounded-full">View</span>
+                        </button>
                       </>
                     )}
                   </div>
 
-                  {/* Role Switcher & Auth Actions */}
+                  {/* Role Switcher & Registration Actions */}
                   <div className="pt-2 border-t border-gray-100 space-y-1.5">
                     <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-                      Switch Role &amp; Portal
+                      Quick Portal Access
                     </div>
 
                     <div className="grid grid-cols-2 gap-1.5">
                       <button
                         onClick={() => {
-                          if (onOpenLoginModal) onOpenLoginModal('pharmacist');
+                          if (onOpenLoginModal) onOpenLoginModal('pharmacist', 'signin');
                           setShowProfileModal(false);
                         }}
                         className="p-2 rounded-xl bg-gray-50 hover:bg-[#f0fbf9] border border-gray-200 hover:border-[#005c55] text-left transition-colors text-xs"
@@ -387,7 +430,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => {
-                          if (onOpenLoginModal) onOpenLoginModal('admin');
+                          if (onOpenLoginModal) onOpenLoginModal('admin', 'signin');
                           setShowProfileModal(false);
                         }}
                         className="p-2 rounded-xl bg-gray-50 hover:bg-slate-900 hover:text-white border border-gray-200 text-left transition-colors text-xs group"
@@ -398,6 +441,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <div className="text-[10px] text-gray-500 group-hover:text-slate-300">CDSCO controller</div>
                       </button>
                     </div>
+
+                    <button
+                      onClick={() => {
+                        if (onOpenLoginModal) onOpenLoginModal('patient', 'register');
+                        setShowProfileModal(false);
+                      }}
+                      className="w-full mt-1.5 text-center py-2 bg-[#005c55] text-white text-xs font-bold rounded-xl hover:bg-[#004b45] flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <UserPlus className="w-3.5 h-3.5 text-[#6ffbbe]" />
+                      <span>Register New Patient / Chemist</span>
+                    </button>
 
                     {role !== 'patient' && onQuickSwitchRole && (
                       <button
@@ -433,7 +487,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mobile Navigation Drawer Links */}
-        <div className="flex md:hidden items-center justify-between gap-1 mt-2.5 pt-2 border-t border-gray-100 overflow-x-auto no-scrollbar">
+        <div className="flex xl:hidden items-center justify-between gap-1 mt-2.5 pt-2 border-t border-gray-100 overflow-x-auto no-scrollbar">
           <button
             onClick={() => onViewChange('consumer-discovery')}
             className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap font-medium ${
@@ -441,6 +495,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             Discovery
+          </button>
+          <button
+            onClick={() => onViewChange('medication-history')}
+            className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap font-bold flex items-center gap-1 ${
+              currentView === 'medication-history' ? 'bg-[#005c55] text-white' : 'text-[#005c55] bg-teal-50'
+            }`}
+          >
+            <Heart className="w-3 h-3 text-red-400 fill-current" />
+            <span>History &amp; Health</span>
           </button>
           <button
             onClick={() => onViewChange('rx-matcher')}
@@ -474,21 +537,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             Admin
           </button>
-          <button
-            onClick={() => onViewChange('system-architecture')}
-            className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap font-medium ${
-              currentView === 'system-architecture' ? 'bg-[#005c55] text-white font-bold' : 'text-gray-600 bg-gray-100'
-            }`}
-          >
-            PRD
-          </button>
           {onOpenLoginModal && (
             <button
-              onClick={() => onOpenLoginModal()}
-              className="px-3 py-1.5 rounded-lg text-xs whitespace-nowrap font-bold bg-amber-100 text-amber-900 flex items-center gap-1"
+              onClick={() => onOpenLoginModal('patient', 'register')}
+              className="px-3 py-1.5 rounded-lg text-xs whitespace-nowrap font-bold bg-[#6ffbbe] text-[#004741] flex items-center gap-1"
             >
-              <LogIn className="w-3 h-3" />
-              <span>Login</span>
+              <UserPlus className="w-3 h-3" />
+              <span>Register</span>
             </button>
           )}
         </div>

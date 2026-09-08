@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { AppViewMode, Medicine, UserSession, UserRole } from './types';
-import { POPULAR_MEDICINES, MOCK_USERS } from './data/mockData';
+import { AppViewMode, Medicine, UserSession, UserRole, MedicineHistoryItem, MedicalCondition } from './types';
+import { POPULAR_MEDICINES, MOCK_USERS, MOCK_MEDICINE_HISTORY, MOCK_PATIENT_CONDITIONS } from './data/mockData';
 import { Navbar } from './components/Navbar';
 import { ConsumerDiscoveryView } from './components/ConsumerDiscoveryView';
 import { RxMatcherMatrixView } from './components/RxMatcherMatrixView';
@@ -8,6 +8,7 @@ import { PharmacyStockLocatorView } from './components/PharmacyStockLocatorView'
 import { PharmacyPartnerPortalView } from './components/PharmacyPartnerPortalView';
 import { AdminPortalView } from './components/AdminPortalView';
 import { ArchitectureAndPRDView } from './components/ArchitectureAndPRDView';
+import { MedicineHistoryAndConditionsView } from './components/MedicineHistoryAndConditionsView';
 import { ClinicalComparisonModal } from './components/ClinicalComparisonModal';
 import { PrescriptionUploadModal } from './components/PrescriptionUploadModal';
 import { PriceDiscrepancyModal } from './components/PriceDiscrepancyModal';
@@ -15,16 +16,12 @@ import { LoginModal } from './components/LoginModal';
 import { 
   ShieldCheck, 
   CheckCircle2, 
-  MapPin, 
-  Clock, 
-  HeartHandshake, 
   Pill, 
-  Building2, 
   PhoneCall, 
-  FileText,
-  Sparkles,
   X,
-  LogIn
+  Heart,
+  Clock,
+  UserPlus
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -38,6 +35,11 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<UserSession>(MOCK_USERS.patient);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [loginModalDefaultRole, setLoginModalDefaultRole] = useState<UserRole>('pharmacist');
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'register'>('signin');
+
+  // Medication History & Patient Conditions State
+  const [medicineHistory, setMedicineHistory] = useState<MedicineHistoryItem[]>(MOCK_MEDICINE_HISTORY);
+  const [patientConditions, setPatientConditions] = useState<MedicalCondition[]>(MOCK_PATIENT_CONDITIONS);
 
   // Modal states
   const [isClinicalModalOpen, setIsClinicalModalOpen] = useState<boolean>(false);
@@ -73,13 +75,24 @@ export default function App() {
     setCurrentView('rx-matcher');
   };
 
-  const handleOpenLoginModal = (role: UserRole = 'pharmacist') => {
+  const handleOpenLoginModal = (role: UserRole = 'pharmacist', mode: 'signin' | 'register' = 'signin') => {
     setLoginModalDefaultRole(role);
+    setAuthModalMode(mode);
     setIsLoginModalOpen(true);
   };
 
   const handleLoginSuccess = (user: UserSession, targetView?: AppViewMode) => {
     setCurrentUser(user);
+    if (targetView) {
+      setCurrentView(targetView);
+    }
+  };
+
+  const handleRegisterSuccess = (newUser: UserSession, initialConditions: MedicalCondition[], targetView?: AppViewMode) => {
+    setCurrentUser(newUser);
+    if (initialConditions.length > 0) {
+      setPatientConditions(initialConditions);
+    }
     if (targetView) {
       setCurrentView(targetView);
     }
@@ -128,6 +141,40 @@ export default function App() {
     setCurrentView('rx-matcher');
   };
 
+  // Medication History Handlers
+  const handleAddMedicineHistoryItem = (item: MedicineHistoryItem) => {
+    setMedicineHistory(prev => [item, ...prev]);
+  };
+
+  const handleUpdateMedicineStatus = (id: string, newStatus: MedicineHistoryItem['status']) => {
+    setMedicineHistory(prev => prev.map(m => m.id === id ? { ...m, status: newStatus } : m));
+  };
+
+  const handleDeleteMedicineHistoryItem = (id: string) => {
+    setMedicineHistory(prev => prev.filter(m => m.id !== id));
+  };
+
+  // Conditions Handlers
+  const handleAddCondition = (condition: MedicalCondition) => {
+    setPatientConditions(prev => [...prev, condition]);
+    // Also sync in currentUser object
+    setCurrentUser(prev => ({
+      ...prev,
+      existingConditions: [...(prev.existingConditions || []), condition.conditionName]
+    }));
+  };
+
+  const handleRemoveCondition = (conditionId: string) => {
+    const target = patientConditions.find(c => c.id === conditionId);
+    setPatientConditions(prev => prev.filter(c => c.id !== conditionId));
+    if (target) {
+      setCurrentUser(prev => ({
+        ...prev,
+        existingConditions: (prev.existingConditions || []).filter(c => c !== target.conditionName)
+      }));
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#faf8ff] text-[#131b2e] selection:bg-[#9cf2e8] selection:text-[#005c55]">
       {/* Top Main Navigation Header */}
@@ -153,6 +200,22 @@ export default function App() {
             selectedPincode={selectedPincode}
             selectedLocality={selectedLocality}
             onQuickHoldPharmacy={handleQuickHoldPharmacy}
+          />
+        )}
+
+        {currentView === 'medication-history' && (
+          <MedicineHistoryAndConditionsView
+            onNavigate={setCurrentView}
+            currentUser={currentUser}
+            medicineHistory={medicineHistory}
+            patientConditions={patientConditions}
+            onAddMedicineHistoryItem={handleAddMedicineHistoryItem}
+            onUpdateMedicineStatus={handleUpdateMedicineStatus}
+            onDeleteMedicineHistoryItem={handleDeleteMedicineHistoryItem}
+            onAddCondition={handleAddCondition}
+            onRemoveCondition={handleRemoveCondition}
+            onQuickHoldPharmacy={handleQuickHoldPharmacy}
+            onSelectMedicineForParity={handleSelectMedicineForParity}
           />
         )}
 
@@ -217,7 +280,7 @@ export default function App() {
                 </span>
               </div>
               <p className="text-gray-600 mt-0.5">
-                1 Strip of <strong>Moxikind-CV 625</strong> is set aside for you at <strong>{holdToast.storeName}</strong>.
+                Generic strip has been held for you at <strong>{holdToast.storeName}</strong>.
               </p>
               <div className="mt-2 flex items-center gap-3 text-[11px] font-semibold text-[#005c55]">
                 <button
@@ -266,12 +329,14 @@ export default function App() {
         medicineName={discrepancyModalData.medicineName}
       />
 
-      {/* Role-based Authentication Login Modal */}
+      {/* Role-based Authentication & Registration Modal */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
+        onRegisterSuccess={handleRegisterSuccess}
         defaultRole={loginModalDefaultRole}
+        initialMode={authModalMode}
       />
 
       {/* Professional Footer */}
@@ -287,7 +352,7 @@ export default function App() {
                 <span className="font-extrabold text-base text-[#005c55]">MediSmart</span>
               </div>
               <p className="text-[11px] text-gray-500 leading-relaxed">
-                India's verified open medicine intelligence and bio-equivalent generic pharmacy discovery platform.
+                India&apos;s verified open medicine intelligence, prescription history tracking, and bio-equivalent generic pharmacy discovery platform.
               </p>
               <div className="flex items-center gap-1.5 text-[11px] text-[#007952] font-semibold">
                 <ShieldCheck className="w-3.5 h-3.5" /> CDSCO Formulary Synced
@@ -296,12 +361,14 @@ export default function App() {
 
             {/* Col 2 */}
             <div className="space-y-2">
-              <h5 className="font-bold text-gray-900 text-xs">Patient Resources</h5>
+              <h5 className="font-bold text-gray-900 text-xs">Patient &amp; Health Locker</h5>
               <ul className="space-y-1.5 text-[11px]">
+                <li><button onClick={() => setCurrentView('medication-history')} className="hover:text-[#005c55] font-semibold text-[#005c55]">Medication History &amp; Refill Due</button></li>
+                <li><button onClick={() => setCurrentView('medication-history')} className="hover:text-[#005c55]">Medical Conditions &amp; Recommendations</button></li>
+                <li><button onClick={() => handleOpenLoginModal('patient', 'register')} className="hover:text-[#005c55]">New User ABHA Registration</button></li>
                 <li><button onClick={() => setCurrentView('consumer-discovery')} className="hover:text-[#005c55]">Medicine Discovery</button></li>
                 <li><button onClick={() => setCurrentView('rx-matcher')} className="hover:text-[#005c55]">Rx Salt Parity Matrix</button></li>
                 <li><button onClick={() => setCurrentView('gis-map-locator')} className="hover:text-[#005c55]">PMBJP Jan Aushadhi Kendras</button></li>
-                <li><button onClick={() => setIsUploadModalOpen(true)} className="hover:text-[#005c55]">AI Prescription Scanner</button></li>
               </ul>
             </div>
 
@@ -320,10 +387,11 @@ export default function App() {
             <div className="space-y-2">
               <h5 className="font-bold text-gray-900 text-xs">Chemist &amp; Health Hubs</h5>
               <ul className="space-y-1.5 text-[11px]">
-                <li><button onClick={() => handleOpenLoginModal('pharmacist')} className="hover:text-[#005c55] font-semibold text-[#005c55]">Pharmacist Partner Sign-In</button></li>
+                <li><button onClick={() => handleOpenLoginModal('pharmacist', 'signin')} className="hover:text-[#005c55] font-semibold text-[#005c55]">Pharmacist Partner Sign-In</button></li>
+                <li><button onClick={() => handleOpenLoginModal('pharmacist', 'register')} className="hover:text-[#005c55]">Register Chemist Store</button></li>
                 <li><button onClick={() => setCurrentView('b2b-partner-portal')} className="hover:text-[#005c55]">Dispensary Partner Portal</button></li>
                 <li><button onClick={() => setCurrentView('b2b-partner-portal')} className="hover:text-[#005c55]">Marg ERP / POS Sync Connector</button></li>
-                <li><a href="tel:18001808080" className="hover:text-[#005c55] flex items-center gap-1"><PhoneCall className="w-3 h-3" /> PMBJP National Helpline: 1800-180-8080</a></li>
+                <li><a href="tel:18001808080" className="hover:text-[#005c55] flex items-center gap-1"><PhoneCall className="w-3 h-3" /> PMBJP Helpline: 1800-180-8080</a></li>
               </ul>
             </div>
           </div>
@@ -333,11 +401,13 @@ export default function App() {
               © 2026 MediSmart Healthcare Technologies. Developed for Bengaluru Health Zone &amp; Pan-India Accessibility.
             </div>
             <div className="flex items-center gap-4">
+              <button onClick={() => handleOpenLoginModal('patient', 'register')} className="text-teal-700 font-bold hover:underline">New User Register</button>
+              <span>•</span>
               <button onClick={() => handleOpenLoginModal('admin')} className="text-gray-500 hover:text-gray-700">Admin Login</button>
               <span>•</span>
               <button onClick={() => handleOpenLoginModal('pharmacist')} className="text-gray-500 hover:text-gray-700">Chemist Login</button>
               <span>•</span>
-              <span className="font-mono text-gray-500">v2.4.0-PROD</span>
+              <span className="font-mono text-gray-500">v2.5.0-PROD</span>
             </div>
           </div>
         </div>

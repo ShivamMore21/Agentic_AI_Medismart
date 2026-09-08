@@ -102,6 +102,65 @@ export interface InventoryItem {
 
 export type UserRole = 'patient' | 'pharmacist' | 'admin';
 
+export interface MedicalCondition {
+  id: string;
+  conditionName: string;
+  diagnosedYear?: string;
+  severity: 'Mild' | 'Moderate' | 'Severe' | 'Controlled';
+  notes?: string;
+  contraindications?: string[];
+}
+
+export interface RecommendedSaltItem {
+  saltName: string;
+  indication: string;
+  standardDosage: string;
+  brandedExamples: string[];
+  brandedAvgMRP: number;
+  janAushadhiGenericPrice: number;
+  savingsPct: number;
+  firstLineClinicalRationale: string;
+  contraindicationWarning?: string;
+  inStockStoresCount: number;
+}
+
+export interface ConditionRecommendation {
+  conditionName: string;
+  category: string;
+  recommendedSalts: RecommendedSaltItem[];
+  lifestyleTips: string[];
+  monitoringGuideline: string;
+  commonContraindications: {
+    drugClass: string;
+    reason: string;
+  }[];
+}
+
+export interface MedicineHistoryItem {
+  id: string;
+  medicineName: string;
+  brandPrescribed: string;
+  saltComposition: string;
+  dosage: string;
+  frequency: string;
+  conditionTargeted: string;
+  startDate: string;
+  endDate?: string;
+  status: 'Active (Ongoing)' | 'Completed' | 'Refill Due' | 'Discontinued';
+  pharmacyName: string;
+  pharmacyLocality: string;
+  mrpPaid: number;
+  originalBrandMRP: number;
+  savingsRealized: number;
+  isJanAushadhi: boolean;
+  holdCode?: string;
+  refillDaysLeft?: number;
+  notes?: string;
+  prescribingDoctor?: string;
+  totalDaysCourse?: number;
+  remainingPills?: number;
+}
+
 export interface UserSession {
   id: string;
   name: string;
@@ -114,6 +173,12 @@ export interface UserSession {
   licenseNumber?: string;
   phone?: string;
   abdmVerified?: boolean;
+  age?: number;
+  gender?: string;
+  pincode?: string;
+  locality?: string;
+  abhaId?: string;
+  existingConditions?: string[];
 }
 
 export interface PharmacyApplication {
@@ -161,6 +226,7 @@ export type AppViewMode =
   | 'consumer-discovery'
   | 'rx-matcher'
   | 'gis-map-locator'
+  | 'medication-history'
   | 'b2b-partner-portal'
   | 'admin-portal'
   | 'system-architecture';
