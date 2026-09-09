@@ -6,3 +6,10 @@ coverage/
 *.log
 .env*
 !.env.example
+!frontend/.env.example
+!backend/.env.example
+
+# SQLite Databases
+*.sqlite
+*.sqlite3
+*.db

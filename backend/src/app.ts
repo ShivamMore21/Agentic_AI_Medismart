@@ -1,0 +1,21 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import config from './config/env';
+import api from './api';
+import { globalLimiter } from './middleware/security';
+import { requestLogger } from './middleware/requestLogger';
+import { getDatabaseStatus } from './config/database';
+
+const app = express();
+app.use(helmet());
+app.use(cors({ origin: config.cors.frontendUrl, methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'], allowedHeaders: ['Content-Type', 'Authorization'] }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(globalLimiter);
+app.use(requestLogger);
+app.get('/api/v1/health', (_req, res) => res.json({ success: true, status: 'ok', service: 'medismart-api', database: getDatabaseStatus(), uptime: Math.floor(process.uptime()), timestamp: new Date().toISOString(), version: '1.0.0' }));
+app.use('/api/v1', api);
+app.use((_req, res) => res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Route not found' } }));
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => { const status = err.statusCode || 500; res.status(status).json({ success: false, error: { code: status === 500 ? 'INTERNAL_ERROR' : 'REQUEST_ERROR', message: config.isDev ? err.message : 'An unexpected error occurred' } }); });
+export default app;

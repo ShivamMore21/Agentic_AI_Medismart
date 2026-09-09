@@ -1,6 +1,0 @@
-{
-  "name": "MediSmart - Generic Medicine & Pharmacy Platform",
-  "description": "Discover CDSCO-approved generic medicine equivalents, track prescription history & refills, manage chronic conditions with ICMR generic recommendations, locate PMBJP Jan Aushadhi Kendras, and register patients and pharmacy partners.",
-  "requestFramePermissions": ["geolocation"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
